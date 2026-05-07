@@ -61,5 +61,7 @@ async def get_database():
 @app.get("/book/books")
 async def get_book_list(db:AsyncSession = Depends(get_database)):
     result = await db.execute(select(Book))
-    book = result.scalars().all()
+    #book = result.scalars().all()#获取所有
+    #book = result.scalars().first()#获取第一个数据
+    book = await db.get(Book,2)
     return book
