@@ -66,11 +66,17 @@ async def get_database():
 #     book = await db.get(Book,2)
 #     return book
 
-#查询(带条件)
-@app.get("/book/get_book/{book_id}")
-async def get_book_list(book_id:int,db:AsyncSession = Depends(get_database)):
-    result = await db.execute(select(Book).where(Book.id == book_id))
-    book = result.scalar_one_or_none()
+#分页查询
+@app.get("/book/get_book_list")
+async def get_book_list(
+    page:int = 1,
+    page_size: int = 2,
+    db:AsyncSession = Depends(get_database)
+):
+    skip = (page - 1) * page_size
+    result = await db.execute(select(Book).offset(skip).limit(page_size))
+    #offset:跳过的记录数 page_size:每页的记录数
+    book = result.scalars().all()
     return book
 
 @app.get("/book/search_book")
@@ -80,3 +86,4 @@ async def get_search_book(db:AsyncSession = (Depends(get_database))):
     result = await db.execute(select(Book).where(Book.id.in_(id_list)))
     book = result.scalars().all()
     return book
+
