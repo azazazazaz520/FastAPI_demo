@@ -58,10 +58,17 @@ async def get_database():
             await session.close()   #关闭会话
 
 
-@app.get("/book/books")
-async def get_book_list(db:AsyncSession = Depends(get_database)):
-    result = await db.execute(select(Book))
-    #book = result.scalars().all()#获取所有
-    #book = result.scalars().first()#获取第一个数据
-    book = await db.get(Book,2)
+# @app.get("/book/books")
+# async def get_book_list(db:AsyncSession = Depends(get_database)):
+#     result = await db.execute(select(Book))
+#     #book = result.scalars().all()#获取所有
+#     #book = result.scalars().first()#获取第一个数据
+#     book = await db.get(Book,2)
+#     return book
+
+#查询
+@app.get("/book/get_book/{book_id}")
+async def get_book_list(book_id:int,db:AsyncSession = Depends(get_database)):
+    result = await db.execute(select(Book).where(Book.id == book_id))
+    book = result.scalar_one_or_none()
     return book
