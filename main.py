@@ -66,9 +66,15 @@ async def get_database():
 #     book = await db.get(Book,2)
 #     return book
 
-#查询
+#查询(带条件)
 @app.get("/book/get_book/{book_id}")
 async def get_book_list(book_id:int,db:AsyncSession = Depends(get_database)):
     result = await db.execute(select(Book).where(Book.id == book_id))
     book = result.scalar_one_or_none()
     return book
+
+@app.get("/book/search_book")
+async def get_search_book(db:AsyncSession = (Depends(get_database))):
+    result = await db.execute(select(Book).where(Book.price >= 200))
+    books = result.scalars().all()
+    return books
