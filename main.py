@@ -1,89 +1,10 @@
-from fastapi import FastAPI,Path,Query,HTTPException,Depends
-from pydantic import BaseModel,Field
-from fastapi.responses import HTMLResponse,FileResponse
-from sqlalchemy.ext.asyncio import create_async_engine,async_sessionmaker,AsyncSession
-from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column
-from datetime import datetime
-from sqlalchemy import DateTime,func,String,Float,select
-# 创建应用实例
+from fastapi import FastAPI
+from routers import news
 app = FastAPI()
-ASYNC_DATABASE_URL = "mysql+aiomysql://root:123456@localhost:3306/FastAPI_first?charset=utf8"
-async_engine = create_async_engine(
-    ASYNC_DATABASE_URL,
-    echo = True,
-    pool_size = 10,
-    max_overflow = 20
-)
-class Base(DeclarativeBase):
-    create_time:Mapped[datetime] = mapped_column(DateTime,insert_default=func.now(),default=func.now,comment="创建时间")    
-    update_time:Mapped[datetime] = mapped_column(DateTime,insert_default=func.now(),default=func.now,onupdate=func.now(),comment="修改时间")
-class Book(Base):
-    __tablename__ = "Book"
-    id:Mapped[int] = mapped_column(primary_key=True,comment="书籍id")
-    book_name:Mapped[str] = mapped_column(String(255),comment="书名")
-    author:Mapped[str] = mapped_column(String(255),comment="作者")
-    price:Mapped[float] = mapped_column(Float,comment="价格")
-    publisher:Mapped[str] = mapped_column(String(255),comment="出版社")
 
-async def create_tables():
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-@app.on_event("startup")
-async def startup_event():
-    await create_tables()
-
-
-# 定义一个简单的 GET 接口
-@app.get("/")   #get请求方法
+@app.get("/")   
 def read_root():
     return {"Hello": "FastAPI", "Status": "Success"}
 
 
-asyncSessionLocal = async_sessionmaker(
-    bind= async_engine,     #绑定数据库引擎
-    class_=AsyncSession,    #指定会话类
-    expire_on_commit=False  #回话不过期
-)
-
-async def get_database():
-    async with asyncSessionLocal() as session:
-        try:
-            yield session   #返回数据库会话给路由处理函数
-            await session.commit()  #提交事务
-        except Exception:
-            await session.rollback()    #回滚
-            raise
-        finally:
-            await session.close()   #关闭会话
-
-
-# @app.get("/book/books")
-# async def get_book_list(db:AsyncSession = Depends(get_database)):
-#     result = await db.execute(select(Book))
-#     #book = result.scalars().all()#获取所有
-#     #book = result.scalars().first()#获取第一个数据
-#     book = await db.get(Book,2)
-#     return book
-
-#分页查询
-@app.get("/book/get_book_list")
-async def get_book_list(
-    page:int = 1,
-    page_size: int = 2,
-    db:AsyncSession = Depends(get_database)
-):
-    skip = (page - 1) * page_size
-    result = await db.execute(select(Book).offset(skip).limit(page_size))
-    #offset:跳过的记录数 page_size:每页的记录数
-    book = result.scalars().all()
-    return book
-
-@app.get("/book/search_book")
-async def get_search_book(db:AsyncSession = (Depends(get_database))):
-    # result = await db.execute(select(Book).where((Book.author.like("曹%")) | (Book.price >= 100)))
-    id_list = [1,2,3]
-    result = await db.execute(select(Book).where(Book.id.in_(id_list)))
-    book = result.scalars().all()
-    return book
-
+app.include_router(news.router)
