@@ -5,12 +5,12 @@ from sqlalchemy import DateTime, Index, Text, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String
 class Base(DeclarativeBase):
-    create_at:Mapped[datetime] = mapped_column(
+    created_at:Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.now,
         comment="创建时间"
     )
-    update_at:Mapped[datetime] = mapped_column(
+    updated_at:Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.now,
         onupdate=datetime.now,
