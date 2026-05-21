@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
-
-
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from config.db_conf import get_db
+from schemas.users import UserRequest
 router = APIRouter(prefix="/api/users", tags=["users"])
 
-@router.get("/register")
+@router.post("/register")
 
-async def register():
+async def register(user_data:UserRequest,db: AsyncSession = Depends(get_db)):
+    #先验证用户名是否存在
+    
     return {
         "code": 200,
         "message": "注册成功",
@@ -13,7 +16,7 @@ async def register():
             "token": "用户访问令牌",
             "userInfo": {
             "id": 1,
-            "username": "example_user",
+            "username": user_data.username,
             "bio": "这个人很懒，什么都没留下",
             "avatar": "https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
             }
