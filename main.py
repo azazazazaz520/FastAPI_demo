@@ -2,7 +2,11 @@ from fastapi import FastAPI
 from routers import news,users
 from fastapi.middleware.cors import CORSMiddleware
 
+from utils.exceptions_handlers import register_exception_handlers
+
 app = FastAPI()
+
+register_exception_handlers(app)  # 注册全局异常处理器
 
 app.add_middleware(
     CORSMiddleware,
