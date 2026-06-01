@@ -41,3 +41,7 @@ async def login(user_data:UserRequest,db: AsyncSession = Depends(get_db)):
     user_token = await users.create_token(db, user.id)
     response_data = UserAuthResponse(token=user_token, user_info=UserInfoResponse.model_validate(user))
     return success_response(message="登录成功",data=response_data)
+
+@router.get("/info")
+async def get_user_info():
+    return
