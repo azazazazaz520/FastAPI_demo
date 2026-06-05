@@ -1,13 +1,14 @@
-import bcrypt
+from passlib.context import CryptContext
+
+# 创建密码上下文
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_hash_password(password: str) -> str:
-    """哈希密码，bcrypt 限制 72 字节"""
-    password_bytes = password.encode()[:72]
-    return bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode()
+# 密码加密
+def get_hash_password(password: str):
+    return pwd_context.hash(password)
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """验证密码"""
-    password_bytes = plain_password.encode()[:72]
-    return bcrypt.checkpw(password_bytes, hashed_password.encode())
+# 密码验证: verify 返回值是布尔型
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)

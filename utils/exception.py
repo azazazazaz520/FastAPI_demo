@@ -7,7 +7,7 @@ from starlette import status
 
 # 开发模式：返回详细错误信息
 # 生产模式：返回简化错误信息
-DEBUG_MODE = True
+DEBUG_MODE = True  # 教学项目保持开启
 
 
 async def http_exception_handler(request: Request, exc: HTTPException):
